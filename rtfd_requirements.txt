@@ -1,8 +1,7 @@
-## Created for ReadTheDocs to make its job
+## Created to force ReadTheDocs.org do its job (with polot directive)!
 six
 jsonschema
 jsonpointer
-numpy
 pandas
 matplotlib
 
