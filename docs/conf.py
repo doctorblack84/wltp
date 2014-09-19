@@ -48,11 +48,18 @@ if on_rtd:
     class Mock(MagicMock):
         @classmethod
         def __getattr__(cls, name):
+            if name in ('__file__', '__path__'):
+                return '/dev/null'
+            elif name[0] == name[0].upper():
+                mockType = type(name, (), {})
+                mockType.__module__ = __name__
+                return mockType
+            else:
                 return Mock()
 
     MOCK_MODULES = [
-        'jsonschema', 'jsonschema.exceptions',
-        'numpy', 'numpy.testing',
+        'jsonschema',
+        'numpy.testing',
         'pandas', 'pandas.core', 'pandas.core.generic', 'pandas.core.common',
         'scipy',
     ]
