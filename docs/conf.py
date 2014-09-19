@@ -51,7 +51,7 @@ if on_rtd:
                 return Mock()
 
     MOCK_MODULES = [
-        'jsonschema', 'jsonschema.exception'
+        'jsonschema', 'jsonschema.exception',
         'numpy', 'numpy.testing',
         'pandas', 'pandas.core', 'pandas.core.generic', 'pandas.core.common',
         'scipy',
