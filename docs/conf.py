@@ -59,7 +59,6 @@ if on_rtd:
 
     MOCK_MODULES = [
         'jsonschema',
-        'numpy.testing',
         'pandas', 'pandas.core', 'pandas.core.generic', 'pandas.core.common',
         'scipy',
     ]
