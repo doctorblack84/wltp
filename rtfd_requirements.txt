@@ -1,0 +1,7 @@
+## Created for ReadTheDocs to make its job
+jsonschema
+jsonpointer',
+numpy',
+pandas
+matplotlib
+
