@@ -58,9 +58,6 @@ if on_rtd:
                 return Mock()
 
     MOCK_MODULES = [
-        'jsonschema',
-        'pandas', 'pandas.core', 'pandas.core.generic', 'pandas.core.common',
-        'scipy',
     ]
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
