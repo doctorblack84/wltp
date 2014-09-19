@@ -1,7 +1,8 @@
 ## Created for ReadTheDocs to make its job
+six
 jsonschema
-jsonpointer',
-numpy',
+jsonpointer
+numpy
 pandas
 matplotlib
 
