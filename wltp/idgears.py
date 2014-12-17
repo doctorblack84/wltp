@@ -120,18 +120,14 @@ def identify_gear_ratios_by_kmeans(obs, code, **kmeans_kws):
         return code_book, avg_dist[-1]
     
     
-#     w_obs = vq.whiten(obs)
-#     w_guess = vq.whiten(code)
     w_obs = obs
     w_guess = code
     
-    k = _1d_kmeans(w_obs, w_guess, guess_func=np.median, **kmeans_kws)
+    centers, distortion = _1d_kmeans(w_obs, w_guess, guess_func=np.median, **kmeans_kws)
     
-    k = k[0]
-#     k = np.sort(k.flatten()) * np.std(obs) # De-whiten
-    k = np.sort(k.flatten())
+    centers = np.sort(centers)
     
-    return k
+    return centers, distortion
 
 
 
@@ -149,16 +145,27 @@ df0 = df[(df.V > 2) & (df.N > 200) & (df.R2 > 0)]
 df1 = df0
 
 
-bins = int(ngears+2) * 6 # Rougly 4 bins per gear plus 2 left & right.
-#bins = int(math.sqrt(df.shape[0]) * ngears/10)
-peaks_df, peaks_df1, h_points, h_centers = identify_gear_ratios_by_binning(df1.R2, bins=bins, ngears=ngears)
-peaks_stv = 1/peaks_df1.ratio.values
-print("peaks_stv: %s"%peaks_stv)
+cases = []
+bins_cases = [
+        (ngears+2) * 6, # Roughly 4 bins per gear plus 2 left & right.
+        math.sqrt(df.shape[0]),
+        np.linspace(df1.R2.min(), df1.R2.max(), ngears),
+]
+for bins in bins_cases:
+    peaks_df, peaks_df1, h_points, h_centers = identify_gear_ratios_by_binning(df1.R2, bins=bins, ngears=ngears)
+    guess = peaks_df1.ratio.values
 
-
-kmeans_ratios = identify_gear_ratios_by_kmeans(df1.R2.values, peaks_df1.ratio.values)
+    ratios, distort = identify_gear_ratios_by_kmeans(df1.R2.values, guess)
+    if ratios.size == ngears:
+        cases.append(np.hstack((guess, ratios, distort)))
+guess_cols = ['g%i'%g for g in range(1, ngears+1)]
+kmeans_cols = ['r%s'%g for g in range(1, ngears+1)]
+cases = pd.DataFrame(np.vstack(cases), columns=guess_cols + kmeans_cols + ['distort'])
+print(cases)
 kmeans_stv = 1/kmeans_ratios
+print("peaks_stv: %s"% 1/peaks_df1.ratio.values)
 print("kmeans_stv: %s"%kmeans_stv)
+    
 
 fig = plt.figure(figsize=(18,5))
 
@@ -175,14 +182,15 @@ plt.ylim(0, df1.N.median() + 2*df1.N.mad())
 plt.xlim(df1.V.median() - 2*df1.V.mad(), df1.V.median() + 2*df1.V.mad())
 
 
-## Plot ratios's from Histogram
+## Plot ratios's Histogram
 #
 ax2 = plt.subplot(1,3,2)
 ax2.plot(h_centers, h_points)
 ax2.plot(peaks_df.ratio, peaks_df.population, 'ob', markersize=8, fillstyle='none')
 ax2.plot(peaks_df1.ratio, peaks_df1.population, 'ob', markersize=8, fillstyle='full') ## Annotate top-#gears
+# plt.hlines(peaks_df.population.mean() - peaks_df.population.mad(), 0, h_centers.max(), 'g', linestyle='-')
 
-## Plot Ratios fromn K-means
+## Scatter-plot Ratios
 ##
 ax3 = plt.subplot(1,3,3)
 R = df1.R2
